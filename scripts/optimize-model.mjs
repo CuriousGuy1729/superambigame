@@ -1,0 +1,10 @@
+import { NodeIO } from '@gltf-transform/core';
+import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
+import { dedup, weld, simplify, prune } from '@gltf-transform/functions';
+import { MeshoptDecoder, MeshoptEncoder, MeshoptSimplifier } from 'meshoptimizer';
+await Promise.all([MeshoptDecoder.ready, MeshoptEncoder.ready, MeshoptSimplifier.ready]);
+const io = new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({'meshopt.decoder':MeshoptDecoder,'meshopt.encoder':MeshoptEncoder});
+const doc = await io.read('public/assets/porsche.glb');
+await doc.transform(dedup(), weld(), simplify({simplifier:MeshoptSimplifier,ratio:0.10,error:0.001}), prune());
+await io.write('public/assets/porsche-driving.glb', doc);
+console.log('Optimized original Porsche asset for real-time rendering.');
